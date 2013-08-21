@@ -1,0 +1,301 @@
+#!/usr/bin/perl
+#
+#eval "exec perl -S $0 $*" 
+#    if $running_under_some_shell;
+#------------------------------------------------------------==ADM==
+# Custom Software, Developed for CUHEP by staff. 
+# This software is in the public domain, furnished "as is", without
+# technical support, and with no warranty, express or implied, as
+# to its usefulness for any purpose.
+#
+# GetAllFiles      
+#
+# REVISION HISTORY
+# Created.                                  02/19/2010  doug johnson
+#-------------------------------------------------------------------
+$0 = substr($0, rindex($0, '/')+1);
+$| = 1;   # Force immediate output.
+$admPath = $ENV{'ADMPATH'};
+$admPath = '/usr/local/adm' unless $admPath;
+unshift(@INC, "$admPath/lib");
+
+use strict;
+use threads;
+use Thread::Queue;
+
+my $subDirectory    = $ARGV[0];
+my $numThreads      = 3;
+my $numStreams      = 2;
+my $maxItemsOnQueue = 100;
+my $sleepTime       = 30;
+
+my $srm_timeout         = "--srm-timeout 3600";
+my $connect_timeout     = "--connect-timeout 3600";
+my $sendreceive_timeout = "--sendreceive-timeout 3600";
+
+#
+# Define some variables
+#
+
+#######UCR
+my $localStore    = "/mnt/hadoop/cms/store/users/cfA/2012";
+my $localSRM      = "srm://charm.ucr.edu:10443/srm/v2/server\?SFN=$localStore";
+#my $localSRM      = "srm://strange.ucr.edu:8443/srm/v2/server?SFN=$localStore";
+######Cornell
+#my $localStore    = "/xrootdfs/cms/store/user/joshmt/cfA/v66/";
+#my $localSRM      = "srm://osg-se.cac.cornell.edu:8443/srm/v2/server?SFN=$localStore";
+######UCSB
+#my $remoteStore   = "/net/cms0/cms0r0/cfA";
+#my $remoteSRM     = "srm://cms2.physics.ucsb.edu:8443/srm/v2/server?SFN=$remoteStore";
+my $remoteStore   = "/cms6r0/stuart/cfA";
+my $remoteSRM     = "srm://cms6.physics.ucsb.edu:8443/srm/v2/server?SFN=$remoteStore";
+######Colorado
+#my $remoteStore   = "/mnt/hadoop/UCSBntup";
+#my $remoteSRM     = "srm://hepse01.colorado.edu:8443/srm/v2/server?SFN=$remoteStore";
+
+our $lcgLS        = "lcg-ls -b -D srmv2";
+our $lcgCP        = "lcg-cp -b -D srmv2 -n $numStreams $srm_timeout $connect_timeout $sendreceive_timeout";
+our $lcgLR        = "lcg-lr -b -D srmv2";
+our $reTries      = 5;
+our $debug        = 0;
+my @subDirs; 
+push(@subDirs, $subDirectory);
+
+if($subDirectory eq '') {
+  print " Usage: $0 Subdirectory\n";
+  print "      Example: $0      WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Spring11-PU_S1_START311_V1G1-v1_AODSIM_UCSB0577_v44\n\n";
+  print "         Then all files from:\n";
+  print "             $remoteSRM/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Spring11-PU_S1_START311_V1G1-v1_AODSIM_UCSB0577_v44\n";
+  print "         will be copied to:\n";
+  print "             $localSRM/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Spring11-PU_S1_START311_V1G1-v1_AODSIM_UCSB0577_v44\n";
+  exit;
+}
+
+
+#
+# Print start information
+#
+PrintWithDate("Starting $0");
+PrintWithDate("    Local Store:  $localStore");
+PrintWithDate("    Local SRM:    $localSRM");
+PrintWithDate("    Remote Store: $remoteStore");
+PrintWithDate("    Remote SRM:   $remoteSRM");
+PrintWithDate("    lcg-ls:       $lcgLS");
+PrintWithDate("    lcg-cp:       $lcgCP");
+
+#
+# Start the FileDownload threads
+#
+my %thread;
+my $dataQueue = Thread::Queue->new;
+for(my $i=1; $i<$numThreads; $i++) {
+  $thread{$i} = threads->new(\&DownloadFile, 10 + $i);
+}
+
+#
+# Loop over the subdirectories and get a list of all the files in the directory
+#
+foreach my $subDir (@subDirs) {
+
+#
+# Loop over @dataFiles and download what we don't already have
+# by pushing the requested files onto the thread queue
+#
+  PrintWithDate("Getting a listing from: $remoteSRM/$subDir");
+  PrintWithDate("Using: $lcgLS $remoteSRM/$subDir");
+  open(LCGLS, "$lcgLS $remoteSRM/$subDir|");
+  my @dataFiles;
+  while(chomp(my $dataFile = <LCGLS>)) {
+    chomp($dataFile = `basename $dataFile`);
+    push(@dataFiles, $dataFile) if $dataFile =~ /\.root$/;
+  }
+  close(LCGLS);
+
+  if($debug > 5) {
+    foreach my $dataFile (@dataFiles) {
+      print " $dataFile\n";
+    }
+    exit;
+  }
+
+
+  foreach my $dataFile (@dataFiles) {
+    PrintWithDate("Checking to see if we need to download:\n  $remoteSRM/$subDir/$dataFile");
+    my $downloadFile = CheckIfFileIsHere("$remoteSRM/$subDir/$dataFile", "$localSRM/$subDir/$dataFile");
+    if($downloadFile) {
+      my $numOnQueue = $dataQueue->pending;
+      while($numOnQueue > $maxItemsOnQueue) {
+	PrintWithDate("$numOnQueue requests currently on the thread queue. Sleeping for $sleepTime seconds");
+	sleep $sleepTime;
+	$numOnQueue = $dataQueue->pending;
+      }
+      PrintWithDate("Adding:\n   $remoteSRM/$subDir/$dataFile\n   $localSRM/$subDir/$dataFile");
+      $dataQueue->enqueue("$remoteSRM/$subDir/$dataFile $localSRM/$subDir/$dataFile $localStore/$subDir/$dataFile");
+    } else {
+      #chomp(my $localLS = `ls -alh $localStore/$subDir/$dataFile 2>&1`); #dubious. we can't ls our xrootd
+      #PrintWithDate("$localLS");
+      PrintWithDate("Finished downloading:\n  $remoteSRM/$subDir/$dataFile");
+      PrintWithDate("File is already here.");
+    }      
+  }
+}
+
+#
+# Push return(s) onto the thread queue
+#
+for(my $i=0; $i<$numThreads; $i++) {
+  $dataQueue->enqueue("return");
+}
+
+#
+# Join the threads as they return
+# Loop through all the threads and join the threads as they finish
+# Don't join the main thread or ourselves
+#
+foreach my $thr (threads->list) {
+  if ($thr->tid && !threads::equal($thr, threads->self)) {
+    $thr->join;
+  }
+}
+
+# jmt -- not sure what this is for
+#system('scp jgsmith@cms2.physics.ucsb.edu:/net/cms2/cms2r0/cfA/NtupleSamples.txt /nfs/data37/cms/cedelmaier/UCSBntup/') ;
+
+PrintWithDate("Finished $0");
+exit;
+
+#
+#---------------------------------------------------------------------------------------
+#  Suroutines start here
+#---------------------------------------------------------------------------------------
+#
+# Thread subroutine to handle downloading the files
+#
+sub DownloadFile {
+  (my $threadNumber) = @_;
+  our $lcgCP;
+  our $lcgLR;
+  our $lcgLS;
+  our $reTries;
+
+  PrintWithDate("Starting ProcessFileRequest thread $threadNumber");
+  while(my $dataElement = $dataQueue->dequeue) {
+    if($dataElement =~ /return/) {
+      print " Thread $threadNumber is returning\n";
+      return;
+    } else {
+      (my $srcFile, my $dstFile, my $localFile) = split(" ", $dataElement);
+      my $DownloadFileOutout = FormatWithDate("Starting to download:\n  $srcFile");
+      my $try = 0;
+      my $gotFile = 0;
+      while($try < $reTries and $gotFile == 0) {
+	$DownloadFileOutout .= FormatWithDate("Running $try): $lcgCP \n  $srcFile\n    $dstFile");
+	my $output = `$lcgCP $srcFile $dstFile 2>&1`;
+	my $status = ($?  >> 8);
+	$DownloadFileOutout .= FormatWithDate("$output");
+	if($status) {
+	  $DownloadFileOutout .= FormatWithDate("ERROR: Error downloading $srcFile");
+	} else {
+	  $DownloadFileOutout .= FormatWithDate("SUCCESS: File dowloaded:\n   src: $srcFile\n   dest: $dstFile");
+	  $gotFile = 1;
+	}
+	$try++;
+      }
+      #chomp(my $localLS = `ls -alh $localFile 2>&1`); #dubious...can't ls our local xrootd need srmls
+      #$DownloadFileOutout .= FormatWithDate("$localLS");
+      $DownloadFileOutout .= FormatWithDate("Finished downloading:\n  $srcFile");
+      print "$DownloadFileOutout\n";
+    }
+  }
+}
+
+#---------------------------------------------------------------------------------------
+# subroutine to print message to STDOUT with the date
+# lines are broken up to keep the output nice looking
+#
+sub FormatWithDate{ 
+  (my $message) = @_;
+  my $returnMessage;
+  chomp(my $date = `date`);
+  chomp($message);
+  (my @linesToPrint) = split("\n", $message);
+  foreach my $line (@linesToPrint) {
+    $returnMessage  .= "$line\n";
+  }
+  return $returnMessage;
+}
+
+#---------------------------------------------------------------------------------------
+# subroutine to print message to STDOUT with the date
+# lines are broken up to keep the output nice looking
+#
+sub PrintWithDate{ 
+  (my $message) = @_;
+  chomp(my $date = `date`);
+  chomp($message);
+  (my @linesToPrint) = split("\n", $message);
+  foreach my $line (@linesToPrint) {
+    print " ${date}: $line\n";
+  }
+}
+
+#
+#---------------------------------------------------------------------------------------
+# subroutine to check whether the file is already here
+#
+sub CheckIfFileIsHere {
+  (my $remoteFile, my $localFile) = @_;
+
+  ($remoteFile) = split(" ", $remoteFile);
+  ($localFile)  = split(" ", $localFile);
+
+  our $lcgLS;
+  our $lcgCP;
+  our $lcgLR;
+  my $remotePermission; my $remoteNumber; my $remoteUID; my $remoteGID; my $remoteSize; my $remoteStatus; my $remoteName;
+  my $localPermission;  my $localNumber;  my $localUID;  my $localGID;  my $localSize;  my $localStatus;  my $localName;
+
+#
+# Get information about remote file using lcg-ls -l
+#
+  PrintWithDate("Starting: $lcgLS -l \n  $remoteFile");
+  chomp(my $remoteFileInfo = `$lcgLS -l  $remoteFile 2>&1`);
+  my $status = ($? >> 8);
+  PrintWithDate("Remote file info:\n  $remoteFileInfo");
+  if($status) {
+    PrintWithDate("Unable to get inforamtion for: $remoteFile");
+    return -1;
+  }
+  ($remotePermission, $remoteNumber, $remoteUID, $remoteGID, $remoteSize, $remoteName) = 
+    split(" ", $remoteFileInfo);
+  $remoteSize = (4294967295 & $remoteSize);
+
+#
+# Get information about local file using lcg-ls -l
+#
+  PrintWithDate("Starting: $lcgLS -l \n  $localFile");
+  chomp(my $localFileInfo = `$lcgLS -l  $localFile 2>&1`);
+  my $status = ($? >> 8);
+  PrintWithDate("Local file info:\n  $localFileInfo");
+  if($status) {
+    PrintWithDate("Unable to get information for: $localFile");
+    return -1;
+  }
+  ($localPermission, $localNumber, $localUID, $localGID, $localSize, $localStatus, $localName) = 
+    split(" ", $localFileInfo);
+  $localSize = (4294967295 & $localSize);
+
+#
+# Check the local and remote file sizes are the same
+#
+  if($remoteSize != $localSize) {
+    PrintWithDate("$localName is here, but has a different size than the remote file:");
+    PrintWithDate("${remoteSize}:   $remoteFile");
+    PrintWithDate("${localSize}:    $localFile");
+    return -1;
+  } else { 
+    PrintWithDate("${remoteSize}:   $remoteFile");
+    PrintWithDate("${localSize}:    $localFile");
+    return 0;
+  }
+}

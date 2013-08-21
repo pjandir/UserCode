@@ -1,0 +1,12 @@
+universe = vanilla
+Executable = /home/cms/pjandir/down/april21_signalScans/CMSSW_5_3_8/src/NtupleTools/BasicLoopCU/eff/files/dummy.sh
+Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000
+Should_Transfer_Files = YES
+WhenToTransferOutput = ON_EXIT
+Output = /home/cms/pjandir/down/april21_signalScans/CMSSW_5_3_8/src/NtupleTools/BasicLoopCU/eff/logs/batch_$(cluster)_$(process)_sampleName.stdout
+Error  = /home/cms/pjandir/down/april21_signalScans/CMSSW_5_3_8/src/NtupleTools/BasicLoopCU/eff/logs/batch_$(cluster)_$(process)_sampleName.stderr
+Log    = /home/cms/pjandir/down/april21_signalScans/CMSSW_5_3_8/src/NtupleTools/BasicLoopCU/eff/logs/batch_$(cluster)_$(process)_sampleName.condor
+notify_user = pjand001@ucr.edu
+notification= Never
+arguments =
+Queue 1
