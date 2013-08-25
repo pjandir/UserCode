@@ -9,6 +9,8 @@
 
 #-------------
 # Usage
+#	Entire 'split' (note name) directory should be under NtupleTools
+#
 #	Enter name of dataset you want to split in 'name'
 #		Dataset must live in 'cfadir'
 #		Can change other user settings if needed, but not needed
