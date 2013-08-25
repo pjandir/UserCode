@@ -81,6 +81,13 @@ then
   then
     echo -e "\n\nWARNING: ${treename}${mod}.root already exists in the ${destfolder} directory. Overwriting in 10 seconds.\n\n"
     sleep 10
+    echo -ne "\n\nWARNING: ${treename}${mod}.root already exists in the ${destfolder} directory. Overwriting in 10 seconds..."
+    for ai in {1..10}
+    do 
+      sleep 1 
+      echo -ne "..$ai"  
+    done 
+    sleep 1
   fi
   
   echo Adding reducedTrees back together.
@@ -94,13 +101,19 @@ then
   if [[ $count -gt $fileLimit ]] 
   then
     echo -e "\nThere are more files ($count) than are accepted (999) by hadd. Splitting the job (again)."
-    echo "Also as a warning, all files in trees will be destroyed in this process. sleeping..."
-    sleep 10
+    echo -ne "Also as a warning, all files in trees will be destroyed in this process. sleeping... "
+    for bi in {1..10}
+    do 
+      sleep 1 
+      echo -ne "..$bi"  
+    done 
+    sleep 1
+    echo ""
     mkdir partTrees
   
-    # The idea here is to make temp dir to successively hadd together an appropriate amount of files.
-    # Move files away from "trees" and hadd together the first piece. We continue until there is nothing
-    # left in "trees." Then we hadd together all those pieces into the usual reducedTrees folder. 
+    # The idea here is to make a temp dir to successively hadd together an appropriate amount of files.
+    # So, move files away from "trees" and hadd together the first piece. We continue until there is nothing
+    # left in "trees." Then we hadd together all those pieces into the destination folder. 
     # Delete the temp dir at the end.
 
     echo "Begin hadd split process.."
@@ -129,7 +142,7 @@ then
           break
         fi
       done
-      hadd -f ./partTrees/part${a}.root ./haddTrees/*.root > trash.txt
+      hadd -f ./partTrees/part${a}.root ./haddTrees/*.root > trash.txt #Hadd with -stoptalking enabled
       rm -r trash.txt haddTrees
       c=0
       echo -e "\nCompleted: $b / $count."
