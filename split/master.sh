@@ -1,16 +1,21 @@
 #!/bin/bash
 
 ###################################################################
-# Master script to prepare dataset for the split and then split it
+# Master script to split a dataset into individual cfA root files
 # (the entire process always in development btw..)
+# 
+# Written by Pawandeep Jandir
 ##################################################################
 
 #-------------
 # Usage
-#	Enter name of dataset you want in 'name'
-#		Get available datasets from 'cfadir'
-#	Wait for all jobs to finish
+#	Enter name of dataset you want to split in 'name'
+#		Dataset must live in 'cfadir'
+#		Can change other user settings if needed, but not needed
+#	Wait for all jobs to finish in the batch system
 # 	Use postmortem (with argument 1) to finish the process
+#		No modification is required but, certain behaviors can be changed if desired
+#		See postmortem for more details
 #-------------
 
 ##### User Settings 

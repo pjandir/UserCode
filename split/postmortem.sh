@@ -9,10 +9,10 @@
 
 ##### User settings
 #Modify the final reducedTree file name, otherwise leave blank
-#Please add "_" to the fron, if you use it!
+#Please add "_" to the front, if you use it!
 mod=
 
-#Destination folder for final reducedTree
+#Destination folder for final reducedTree in working directory
 destfolder=reducedTrees
 
 #File limit for hadd--try not to change
@@ -27,7 +27,7 @@ name=QCD_Pt-1800_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_AO
 nfiles=123
 #Subdirectory where many temp files are stored. Written by master. 
 dirname=./files/
-#User name
+#User name. Written by master. 
 user=pj
 #####
 
@@ -75,11 +75,11 @@ then
   #
   tname=$(ls trees/*root | head -1) 
   treename=$(root -l -b -q 'GetTreeName.C("'$tname'")' | tail -1)
-  echo The sample will be written to $treename${mod}.root
+  echo The sample will be written to ./${destfolder}/$treename${mod}.root
 
   if [[ -f ./${destfolder}/${treename}${mod}.root  ]]
   then
-    echo -e "\n\nWARNING: ${treename}${mod}.root already exists in the reducedTree directory. Overwriting in 10 seconds.\n\n"
+    echo -e "\n\nWARNING: ${treename}${mod}.root already exists in the ${destfolder} directory. Overwriting in 10 seconds.\n\n"
     sleep 10
   fi
   
