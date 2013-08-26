@@ -88,15 +88,14 @@ then
 
   if [[ -f ./${destfolder}/${treename}${mod}.root  ]]
   then
-    echo -e "\n\nWARNING: ${treename}${mod}.root already exists in the ${destfolder} directory. Overwriting in 10 seconds.\n\n"
-    sleep 10
-    echo -ne "\n\nWARNING: ${treename}${mod}.root already exists in the ${destfolder} directory. Overwriting in 10 seconds..."
+    echo -ne "\n\nWARNING: ${treename}${mod}.root already exists in the ${destfolder} directory. Overwriting in 10 seconds... "
     for ai in {1..10}
     do 
       sleep 1 
       echo -ne "..$ai"  
     done 
     sleep 1
+    echo -e "\n"
   fi
   
   echo Adding reducedTrees back together.
@@ -117,7 +116,7 @@ then
       echo -ne "..$bi"  
     done 
     sleep 1
-    echo ""
+    echo -e ""
     mkdir partTrees
   
     # The idea here is to make a temp dir to successively hadd together an appropriate amount of files.
