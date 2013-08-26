@@ -7,10 +7,13 @@
 # Written by Pawandeep Jandir
 ##################################################################
 
+# Some notes:
+#
+# Entire 'split' (note name) directory should be under NtupleTools
+# ROOT and hadd are used in this process, so make sure cmsenv is set beforehand
+
 #-------------
 # Usage
-#	Entire 'split' (note name) directory should be under NtupleTools
-#
 #	Enter name of dataset you want to split in 'name'
 #		Dataset must live in 'cfadir'
 #		Can change other user settings if needed, but not needed
@@ -25,7 +28,7 @@
 #name=TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1798_v69
 name=QCD_Pt-1800_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1822_v69
 
-#Name of user. Do not leave blank! 
+#Name of user. Keep it short with no spaces. Do not leave blank! 
 user=pj
 
 #Subdirectory where many temp files are stored.
@@ -38,6 +41,14 @@ cfadir=/mnt/hadoop/cms/store/users/cfA/2012
 
 
 #Do some error-checking to make sure things will run smoothly in the process
+root -l -b -q > trash.txt
+rval=$?
+rm trash.txt
+if [[ $rval -ne 0 ]]
+then
+  echo -e "Error: ROOT not found. Is cmsenv (or similar) set?"
+  exit
+fi
 if [[ $name == *txt ]]
 then
   echo -e "Error: Remove .txt from end of file name"

@@ -33,6 +33,19 @@ user=pj
 
 
 #Error checking
+root -l -b -q > trash.txt
+rval=$?
+rm trash.txt
+if [[ $rval -ne 0 ]]
+then
+  echo -e "Error: ROOT not found. Is cmsenv (or similar) set?"
+  exit
+fi
+if [[ $name == *txt ]]
+then
+  echo -e "Error: Remove .txt from end of file name"
+  exit
+fi
 if [[ $# -ne 1 ]]
 then
   echo Error: usage. Provide argument to recombine trees. 
@@ -48,11 +61,7 @@ then
   echo Error: There is nothing in ./trees!
   exit
 fi
-if [[ ! -d ./${destfolder} ]]
-then
-  mkdir ${destfolder}
-fi
-
+mkdir -p $destfolder
 
 t="$(date +%s)"
 
