@@ -1,4 +1,5 @@
 
+//Careful cfA versions are hardcoded..
 void GetTreeName( TString inputFile="") {
 
   string str;
@@ -13,9 +14,19 @@ void GetTreeName( TString inputFile="") {
     str = name;
   }
 
-  //Find the .root and cut it out
-  size_t und = str.find(".root");
-  string ret = str.substr(0,und);
+  //Find the .root and cut it out.
+  //It must be done this way since the usual names here are: reducedTree.blah.Name_of_Dataset_v69_batch_1234.root
+  size_t und = str.find("v65");
+  if ( und > 255 ) und = str.find("v66");
+  if ( und > 255 ) und = str.find("v67");
+  if ( und > 255 ) und = str.find("v68");
+  if ( und > 255 ) und = str.find("v69");
+  if ( und > 255 ) und = str.find("v70");
+  if ( und > 255 ) und = str.find("v71");
+  if ( und > 255 ) und = str.find("v72");
+  if ( und > 255 ) und = str.find("v73");
+  if ( und > 255 ) und = str.find("v74");
+  string ret = str.substr(0,und+3);
 
   cout << ret << endl;
   return;
