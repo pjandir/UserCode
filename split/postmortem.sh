@@ -109,7 +109,7 @@ then
   if [[ $count -gt $fileLimit ]] 
   then
     echo -e "\nThere are more files ($count) than are accepted (999) by hadd. Splitting the job (again)."
-    echo -ne "Also as a warning, all files in trees will be destroyed in this process. sleeping... "
+    echo -e "Also as a warning, all files in trees will be destroyed in this process. sleeping... "
     for bi in {1..10}
     do 
       sleep 1 
