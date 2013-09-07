@@ -9,17 +9,17 @@
 
 # Some notes:
 #
-# Entire 'split' (note name) directory should be under NtupleTools
-# ROOT and hadd are used in this process, so make sure cmsenv is set beforehand
+# Entire 'split' (note the name) directory should be under NtupleTools
+# ROOT and Hadd are used in this process, so make sure cmsenv is set beforehand
 
 #-------------
 # Usage
 #	Enter name of dataset you want to split in 'name'
 #		Dataset must live in 'cfadir'
-#		Can change other user settings if needed, but not needed
+#		Can change other user settings if needed, but not necessary
 #	Wait for all jobs to finish in the batch system
 # 	Use postmortem (with argument 1) to finish the process
-#		No modification is required but, certain behaviors can be changed if desired
+#		No modification is required there either but, certain behaviors can be changed if desired
 #		See postmortem for more details
 #-------------
 
