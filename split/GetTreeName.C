@@ -23,10 +23,17 @@ void GetTreeName( TString inputFile="") {
   if ( und > 255 ) und = str.find("v69");
   if ( und > 255 ) und = str.find("v70");
   if ( und > 255 ) und = str.find("v71");
+  if ( und > 255 ) und = str.find("v71s");
   if ( und > 255 ) und = str.find("v72");
   if ( und > 255 ) und = str.find("v73");
   if ( und > 255 ) und = str.find("v74");
   string ret = str.substr(0,und+3);
+
+  //Special for v71 skim&slim
+  if ( str.find("ra2b") ) {
+    und = str.find("v71s");
+    ret = str.substr(0,und+4);
+  }
 
   cout << ret << endl;
   return;
