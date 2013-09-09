@@ -1,4 +1,3 @@
-
 //Careful cfA versions are hardcoded..
 void GetTreeName( TString inputFile="") {
 
@@ -30,7 +29,7 @@ void GetTreeName( TString inputFile="") {
   string ret = str.substr(0,und+3);
 
   //Special for v71 skim&slim
-  if ( str.find("ra2b") ) {
+  if ( str.find("ra2b") < 256 ) {
     und = str.find("v71s");
     ret = str.substr(0,und+4);
   }
