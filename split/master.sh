@@ -1,11 +1,17 @@
 #!/bin/bash
 
-###################################################################
-# Master script to split a dataset into individual cfA root files
-# (the entire process always in development btw..)
+###########################################################################################
+# Master script to split a dataset into individual cfA root files to make reducedTrees
 # 
-# Written by Pawandeep Jandir
-##################################################################
+# 
+#   - This entire process is still in development
+#     - It is not mandatory to be completely up-to-date to the code however
+#       - Though it is recommended
+#   - Please report to the author for bug reports and any other requests
+#
+#
+# Written by: Pawandeep Jandir
+###########################################################################################
 
 # Some notes:
 #
@@ -32,16 +38,16 @@ name=TTWJets_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1857_
 #Name of user. Keep it short with no spaces. Do not leave blank! 
 user=pj
 
-#Subdirectory where many temp files are stored.
-dirname=./files/
-
 #Directory where cfA datasets are stored. Change with caution.  
 cfadir=/mnt/hadoop/cms/store/users/cfA/2012
+
+#Subdirectory where many temp files are stored.
+subdir=./files/
 
 #Produce btag efficiency variables. If this is not needed/wanted, it is safe to turn off.
 btageff=true
 
-#Enable mode for testing purposes
+#Mode for testing purposes
 debug=false
 
 #####
@@ -53,12 +59,7 @@ rval=$?
 rm trash.txt
 if [[ $rval -ne 0 ]]
 then
-  echo -e "Error: ROOT not found. Is cmsenv (or similar) set?"
-  exit
-fi
-if [[ $name == *txt ]]
-then
-  echo -e "Error: Remove .txt from end of file name"
+  echo -e "Error: ROOT not found. Is cmsenv (or similar) sourced?"
   exit
 fi
 if [[ ! -f ../$name.txt ]] 
@@ -95,20 +96,19 @@ then
   exit
 fi
 
+
 t="$(date +%s)"
 
-#Full path to the directory where this script lives
-fullpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-#Name of this directory where this script lives
-thisdir=${fullpath##*/}
-#Full path to directory where the reducedTree/EventCalculator_cfA code lives
-thepath=${fullpath%${thisdir}}
+#Get some paths that are needed
+fullpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" 	#Full path to the directory where this script lives
+thisdir=${fullpath##*/} 					#Name of this directory where this script lives
+thepath=${fullpath%${thisdir}} 					#Full path to directory where the reducedTree/EventCalculator_cfA code lives
 
 #Create some directories in case they don't exist yet
 mkdir -p trees           #Make a dir for the individual tree files
 mkdir -p logs            #Make a dir for condor log files
 mkdir -p reducedTrees    #Make a dir for final reducedTree location. Duplicated in postmortem. 
-mkdir -p $dirname        #Make a dir for temp files
+mkdir -p $subdir        #Make a dir for temp files
 
 #
 sample=$(root -l -b -q 'GetSampleName.C("'$name'")' | tail -1) 
@@ -117,7 +117,7 @@ echo The sample to be done is $sample
 #Send various variables/things to postmortem
 sed -i 's@^name=.*@'"name=$name"'@g' postmortem.sh 
 sed -i 's@^user=.*@'"user=$user"'@g' postmortem.sh 
-sed -i 's@^dirname=.*@'"dirname=$dirname"'@g' postmortem.sh 
+sed -i 's@^subdir=.*@'"subdir=$subdir"'@g' postmortem.sh 
 sed -i 's@^btageff=.*@'"btageff=$btageff"'@g' postmortem.sh 
 
 sleep 1
@@ -144,10 +144,10 @@ while read p; do
    
     sed -e 's@dummy.txt@'${name}_batch_$y.txt'@g' -e 's@dumNum@'$y'@g' -e 's@dumPath2@'$thisdir'@g' -e 's@dumPath@'$thepath'@g' skeleton.sh > ${user}_${sample}_$y.sh
 
-    sed -e 's@dummy.sh@'$dirname/${user}_${sample}_$y.sh'@g' -e 's@sampleName@'$sample'@g' -e 's@dumPath@'$fullpath'@g' skeleton.jdl > ${user}_${sample}_$y.jdl 
+    sed -e 's@dummy.sh@'$subdir/${user}_${sample}_$y.sh'@g' -e 's@sampleName@'$sample'@g' -e 's@dumPath@'$fullpath'@g' skeleton.jdl > ${user}_${sample}_$y.jdl 
 
-    mv ${user}_${sample}_$y.sh ${user}_${sample}_$y.jdl $dirname
-    condor_submit ${dirname}${user}_${sample}_$y.jdl >/dev/null
+    mv ${user}_${sample}_$y.sh ${user}_${sample}_$y.jdl $subdir
+    condor_submit ${subdir}${user}_${sample}_$y.jdl >/dev/null
 
     echo -ne "."
 

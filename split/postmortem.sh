@@ -1,11 +1,11 @@
 #!/bin/bash
 
-##############################################################################
+###########################################################################################
 # Finish the job by removing ancillary files and add everything back together
 # Command Line Argument required
 # 	- A '1' to recombine trees into one, final reducedTree
 #	- Anything else to delete all trees and not combine them
-##############################################################################
+###########################################################################################
 
 ##### User settings
 #Modify the final reducedTree file name, otherwise leave blank
@@ -26,7 +26,7 @@ name=TTWJets_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1857_
 #Number of files (or jobs) submitted. Written by master. 
 nfiles=14
 #Subdirectory where many temp files are stored. Written by master. 
-dirname=./files/
+subdir=./files/
 #User name. Written by master. 
 user=pj
 #Worry about btag efficiency. Written by master. 
@@ -76,8 +76,8 @@ echo Deleting supplementary files created from splitting process.
 sleep 1
 
 rm ../${name}_batch_*.txt
-rm $dirname${user}_${sample}_*.sh
-rm $dirname${user}_${sample}_*.jdl
+rm $subdir${user}_${sample}_*.sh
+rm $subdir${user}_${sample}_*.jdl
 if $btageff; 
 then
   rm ./../btagEffMaps/histos_btageff_csvm_${name}_batch_*.root 
