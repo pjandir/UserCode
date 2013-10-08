@@ -9,24 +9,25 @@
 
 # Some notes:
 #
-# Entire 'split' (note the name) directory should be under NtupleTools
-# ROOT and Hadd are used in this process, so make sure cmsenv is set beforehand
+# Entire "split" (can change that name, if desired) directory should be under NtupleTools
+# ROOT and hadd are used in this process, so make sure ROOT is sourced properl
 
 #-------------
 # Usage
 #	Enter name of dataset you want to split in 'name'
 #		Dataset must live in 'cfadir'
-#		Can change other user settings if needed, but not necessary
+#		Can change other user settings if needed, but not needed
 #	Wait for all jobs to finish in the batch system
 # 	Use postmortem (with argument 1) to finish the process
-#		No modification is required there either but, certain behaviors can be changed if desired
+#		No modification is required but, certain behaviors can be changed if desired
 #		See postmortem for more details
 #-------------
 
 ##### User Settings 
 
-#name=TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1798_v69
-name=QCD_Pt-1800_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1822_v69
+#Full cfA name of dataset
+#name=TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1850_v71
+name=TTWJets_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1857_v71
 
 #Name of user. Keep it short with no spaces. Do not leave blank! 
 user=pj
@@ -36,6 +37,12 @@ dirname=./files/
 
 #Directory where cfA datasets are stored. Change with caution.  
 cfadir=/mnt/hadoop/cms/store/users/cfA/2012
+
+#Produce btag efficiency variables. If this is not needed/wanted, it is safe to turn off.
+btageff=true
+
+#Enable mode for testing purposes
+debug=false
 
 #####
 
@@ -82,18 +89,20 @@ then
   echo -e "Error: No files in $name.txt \nCheck text file"
   exit
 fi
-if [[ ! -f ../btagEffMaps/histos_btageff_csvm_${name}.root ]] 
+if [[ ! -f ../btagEffMaps/histos_btageff_csvm_${name}.root ]] && $btageff;
 then
   echo -e "Error: btageff histo file does not exist"
   exit
 fi
 
+t="$(date +%s)"
+
+#Full path to the directory where this script lives
+fullpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#Name of this directory where this script lives
+thisdir=${fullpath##*/}
 #Full path to directory where the reducedTree/EventCalculator_cfA code lives
-#There is a better way to code this, and I'll figure it out later.  
-here=$(pwd -P) #-P option not universal. One reason this method should be updated. 
-cd ..
-thepath=$(pwd -P)
-cd $here
+thepath=${fullpath%${thisdir}}
 
 #Create some directories in case they don't exist yet
 mkdir -p trees           #Make a dir for the individual tree files
@@ -105,6 +114,12 @@ mkdir -p $dirname        #Make a dir for temp files
 sample=$(root -l -b -q 'GetSampleName.C("'$name'")' | tail -1) 
 echo The sample to be done is $sample
 
+#Send various variables/things to postmortem
+sed -i 's@^name=.*@'"name=$name"'@g' postmortem.sh 
+sed -i 's@^user=.*@'"user=$user"'@g' postmortem.sh 
+sed -i 's@^dirname=.*@'"dirname=$dirname"'@g' postmortem.sh 
+sed -i 's@^btageff=.*@'"btageff=$btageff"'@g' postmortem.sh 
+
 sleep 1
 echo -e "\nPreparing files.\n\n"
 sleep 2
@@ -115,26 +130,37 @@ sleep 2
 while read p; do
 
   y=`expr $y + 1` 
-  cp ../btagEffMaps/histos_btageff_csvm_${name}.root ../btagEffMaps/histos_btageff_csvm_${name}_batch_$y.root 
 
-  echo $p > ${name}_batch_$y.txt
-  mv ${name}_batch_$y.txt ..
+  if ! $debug ;
+  then 
+
+    if $btageff ;
+    then
+      cp ../btagEffMaps/histos_btageff_csvm_${name}.root ../btagEffMaps/histos_btageff_csvm_${name}_batch_$y.root 
+    fi
+
+    echo $p > ${name}_batch_$y.txt
+    mv ${name}_batch_$y.txt ..
    
-  sed -e 's@dummy.txt@'${name}_batch_$y.txt'@g' -e 's@dumNum@'$y'@g' -e 's@dumPath@'$thepath'@g' skeleton.sh > ${user}_${sample}_$y.sh
+    sed -e 's@dummy.txt@'${name}_batch_$y.txt'@g' -e 's@dumNum@'$y'@g' -e 's@dumPath2@'$thisdir'@g' -e 's@dumPath@'$thepath'@g' skeleton.sh > ${user}_${sample}_$y.sh
 
-  sed -e 's@dummy.sh@'$dirname/${user}_${sample}_$y.sh'@g' -e 's@sampleName@'$sample'@g' -e 's@dumPath@'$thepath'@g' skeleton.jdl > ${user}_${sample}_$y.jdl 
+    sed -e 's@dummy.sh@'$dirname/${user}_${sample}_$y.sh'@g' -e 's@sampleName@'$sample'@g' -e 's@dumPath@'$fullpath'@g' skeleton.jdl > ${user}_${sample}_$y.jdl 
 
-  mv ${user}_${sample}_$y.sh ${user}_${sample}_$y.jdl $dirname
-  condor_submit ${dirname}${user}_${sample}_$y.jdl
+    mv ${user}_${sample}_$y.sh ${user}_${sample}_$y.jdl $dirname
+    condor_submit ${dirname}${user}_${sample}_$y.jdl >/dev/null
+
+    echo -ne "."
+
+  fi
 
 done < ./../$name.txt
 
-echo -e "\nSubmitted $y batch files for $sample."
+echo -e "\n\nSubmitted $y batch files for $sample."
 
-#Send various variables/things to postmortem
+#Also send number of files
 sed -i 's@^nfiles=.*@'"nfiles=$y"'@g' postmortem.sh 
-sed -i 's@^name=.*@'"name=$name"'@g' postmortem.sh 
-sed -i 's@^user=.*@'"user=$user"'@g' postmortem.sh 
-sed -i 's@^dirname=.*@'"dirname=$dirname"'@g' postmortem.sh 
+
+t="$(($(date +%s)-t))"
+printf "\nTime it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((t/60))" "$((t%60))"
 
 exit

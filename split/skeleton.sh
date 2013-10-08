@@ -8,11 +8,7 @@ source $VO_CMS_SW_DIR/cmsset_default.sh
 
 cd dumPath
 
-export CVSROOT=:pserver:anonymous@cmscvs.cern.ch:/cvs_server/repositories/CMSSW
-
-#ROOTSYS=/data/bottom/osg_app/cmssoft/cms/slc5_amd64_gcc434/lcg/root/5.27.06b-cms16/
 ROOTSYS=/data/bottom/osg_app/cmssoft/cms/slc5_amd64_gcc462/lcg/root/5.32.00
-
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$PYTHONDIR/lib:$LD_LIBRARY_PATH
 export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
 export SCRAM_ARCH=slc5_amd64_gcc462
@@ -24,7 +20,6 @@ setlha
 cmsenv
 
 ./run_Analysis $file 
-#./run_Analysis $file dumNum
-mv reducedTree*batch_dumNum.root ./split/trees
+mv reducedTree*batch_dumNum.root ./dumPath2/trees
 
 exit

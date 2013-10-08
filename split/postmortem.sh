@@ -22,13 +22,15 @@ fileLimit=900
 
 ##### Non-user settings (i.e. do not touch)
 #Name of dataset. Written by master.
-name=QCD_Pt-1800_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1822_v69
+name=TTWJets_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1857_v71
 #Number of files (or jobs) submitted. Written by master. 
-nfiles=123
+nfiles=14
 #Subdirectory where many temp files are stored. Written by master. 
 dirname=./files/
 #User name. Written by master. 
 user=pj
+#Worry about btag efficiency. Written by master. 
+btageff=false
 #####
 
 
@@ -58,8 +60,8 @@ then
 fi
 if [[ ! $(ls -A  ./trees)  ]]
 then
-  echo Error: There is nothing in ./trees!
-  exit
+  echo Warning: There is nothing in ./trees!
+  sleep 10
 fi
 mkdir -p $destfolder
 
@@ -74,9 +76,12 @@ echo Deleting supplementary files created from splitting process.
 sleep 1
 
 rm ../${name}_batch_*.txt
-rm ./../btagEffMaps/histos_btageff_csvm_${name}_batch_*.root 
-rm ./files/${user}_${sample}_*.sh
-rm ./files/${user}_${sample}_*.jdl
+rm $dirname${user}_${sample}_*.sh
+rm $dirname${user}_${sample}_*.jdl
+if $btageff; 
+then
+  rm ./../btagEffMaps/histos_btageff_csvm_${name}_batch_*.root 
+fi
 
 if [ $1 -eq 1  ]
 then 
@@ -109,14 +114,14 @@ then
   if [[ $count -gt $fileLimit ]] 
   then
     echo -e "\nThere are more files ($count) than are accepted (999) by hadd. Splitting the job (again)."
-    echo -e "Also as a warning, all files in trees will be destroyed in this process. sleeping... "
+    echo -ne "Also as a warning, all files in trees will be destroyed in this process. sleeping... "
     for bi in {1..10}
     do 
       sleep 1 
       echo -ne "..$bi"  
     done 
     sleep 1
-    echo -e ""
+    echo ""
     mkdir partTrees
   
     # The idea here is to make a temp dir to successively hadd together an appropriate amount of files.
