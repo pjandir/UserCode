@@ -43,19 +43,9 @@ then
   echo -e "Error: ROOT not found. Is cmsenv (or similar) set?"
   exit
 fi
-if [[ $name == *txt ]]
-then
-  echo -e "Error: Remove .txt from end of file name"
-  exit
-fi
 if [[ $# -ne 1 ]]
 then
   echo Error: usage. Provide argument to recombine trees. 
-  exit
-fi
-if [[ $name == *txt ]]
-then
-  echo Error: Remove .txt from end of file name 
   exit
 fi
 if [[ ! $(ls -A  ./trees)  ]]
