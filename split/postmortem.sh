@@ -173,6 +173,6 @@ fi
 
 
 t="$(($(date +%s)-t))"
-printf "Time it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((t/60))" "$((t%60))"
+printf "Time it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((((t/60))%60))" "$((t%60))"
 
 exit
