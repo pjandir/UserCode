@@ -76,9 +76,10 @@ fi
 if [ $1 -eq 1  ]
 then 
 
-  #
+  #Get name of tree
   tname=$(ls trees/*root | head -1) 
-  treename=$(root -l -b -q 'GetTreeName.C("'$tname'")' | tail -1)
+  tnamed=${tname##*/}
+  treename=${tnamed%*_batch_*}
   echo The sample will be written to ./${destfolder}/$treename${mod}.root
 
   if [[ -f ./${destfolder}/${treename}${mod}.root  ]]
