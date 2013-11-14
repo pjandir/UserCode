@@ -78,6 +78,7 @@ void GetSampleName( TString inputFile="") {
   if (inputFile.Contains("TChiHH"))           ret = "TChiHH"  ;
   if (inputFile.Contains("T6bbHH"))           ret = "T6bbHH"  ;
   if (inputFile.Contains("T6ttHH"))           ret = "T6ttHH"  ;
+  if (inputFile.Contains("T5Wh"))             ret = "T5Wh"    ;
   //pMSSM
   if (inputFile.Contains("pMSSM")) {
     if ( inputFile.Contains("batch1") )     ret = "pMSSM_b1";
