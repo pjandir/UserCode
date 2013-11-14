@@ -32,14 +32,16 @@
 ##### User Settings 
 
 #Full cfA name of dataset
-#name=TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1850_v71
-name=TTWJets_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1857_v71
+name=TTJets_WToBC_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V19-v1_AODSIM_UCSB1966_v71
 
 #Name of user. Keep it short with no spaces. Do not leave blank! 
 user=pj
 
 #Directory where cfA datasets are stored. Change with caution.  
 cfadir=/mnt/hadoop/cms/store/users/cfA/2012
+
+#Number of cfA root files per batch job. Default is one. 
+multiple=1
 
 #Subdirectory where many temp files are stored.
 subdir=./files/
@@ -145,8 +147,14 @@ while read p; do
     fi
 
     echo $p > ${name}_batch_$y.txt
+    for (( a=1; a<$multiple; a++ ))
+    do  
+      read p2 
+      echo $p2 >> ${name}_batch_$y.txt
+    done 
+
     mv ${name}_batch_$y.txt ..
-   
+ 
     sed -e 's@dummy.txt@'${name}_batch_$y.txt'@g' -e 's@dumNum@'$y'@g' -e 's@dumPath2@'$thisdir'@g' -e 's@dumPath@'$thepath'@g' skeleton.sh > ${user}_${sample}_$y.sh
 
     sed -e 's@dummy.sh@'$subdir/${user}_${sample}_$y.sh'@g' -e 's@sampleName@'$sample'@g' -e 's@dumPath@'$fullpath'@g' skeleton.jdl > ${user}_${sample}_$y.jdl 
@@ -155,6 +163,12 @@ while read p; do
     condor_submit ${subdir}${user}_${sample}_$y.jdl >/dev/null
 
     echo -ne "."
+
+    mo=$(((y+1)%710))
+    if [[ $mo -eq 0 ]]
+    then
+      sleep 120
+    fi
 
   fi
 

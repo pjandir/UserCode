@@ -1,11 +1,11 @@
 #!/bin/bash
 
-###########################################################################################
+##############################################################################
 # Finish the job by removing ancillary files and add everything back together
 # Command Line Argument required
 # 	- A '1' to recombine trees into one, final reducedTree
 #	- Anything else to delete all trees and not combine them
-###########################################################################################
+##############################################################################
 
 ##### User settings
 #Modify the final reducedTree file name, otherwise leave blank
@@ -22,15 +22,15 @@ fileLimit=900
 
 ##### Non-user settings (i.e. do not touch)
 #Name of dataset. Written by master.
-name=TTWJets_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_AODSIM_UCSB1857_v71
+name=TTJets_WToBC_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V19-v1_AODSIM_UCSB1966_v71
 #Number of files (or jobs) submitted. Written by master. 
-nfiles=14
+nfiles=28
 #Subdirectory where many temp files are stored. Written by master. 
-subdir=./files/
+dirname=./files/
 #User name. Written by master. 
 user=pj
 #Worry about btag efficiency. Written by master. 
-btageff=false
+btageff=true
 #####
 
 
@@ -43,9 +43,19 @@ then
   echo -e "Error: ROOT not found. Is cmsenv (or similar) set?"
   exit
 fi
+if [[ $name == *txt ]]
+then
+  echo -e "Error: Remove .txt from end of file name"
+  exit
+fi
 if [[ $# -ne 1 ]]
 then
   echo Error: usage. Provide argument to recombine trees. 
+  exit
+fi
+if [[ $name == *txt ]]
+then
+  echo Error: Remove .txt from end of file name 
   exit
 fi
 if [[ ! $(ls -A  ./trees)  ]]
@@ -60,23 +70,14 @@ t="$(date +%s)"
 #
 sample=$(root -l -b -q 'GetSampleName.C("'$name'")' | tail -1) 
 echo The sample to be done is $sample
-
-
-echo Deleting supplementary files created from splitting process.
 sleep 1
 
-rm ../${name}_batch_*.txt
-rm $subdir${user}_${sample}_*.sh
-rm $subdir${user}_${sample}_*.jdl
-if $btageff; 
-then
-  rm ./../btagEffMaps/histos_btageff_csvm_${name}_batch_*.root 
-fi
+
 
 if [ $1 -eq 1  ]
 then 
 
-  #Get name of tree
+  #Get final tree name
   tname=$(ls trees/*root | head -1) 
   tnamed=${tname##*/}
   treename=${tnamed%*_batch_*}
@@ -146,6 +147,7 @@ then
           break
         fi
       done
+
       hadd -f ./partTrees/part${a}.root ./haddTrees/*.root > trash.txt #Hadd with -stoptalking enabled
       rm -r trash.txt haddTrees
       c=0
@@ -172,8 +174,18 @@ then
   rm ./trees/*.root
 fi
 
+echo Deleting supplementary files created from splitting process.
+sleep 1
+
+rm ../${name}_batch_*.txt
+rm $dirname${user}_${sample}_*.sh
+rm $dirname${user}_${sample}_*.jdl
+if $btageff; 
+then
+  rm ./../btagEffMaps/histos_btageff_csvm_${name}_batch_*.root 
+fi
 
 t="$(($(date +%s)-t))"
-printf "Time it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((((t/60))%60))" "$((t%60))"
+printf "Time it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((((t/60))%60))"  "$((t%60))"
 
 exit
