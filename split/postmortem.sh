@@ -43,19 +43,9 @@ then
   echo -e "Error: ROOT not found. Is cmsenv (or similar) set?"
   exit
 fi
-if [[ $name == *txt ]]
-then
-  echo -e "Error: Remove .txt from end of file name"
-  exit
-fi
 if [[ $# -ne 1 ]]
 then
   echo Error: usage. Provide argument to recombine trees. 
-  exit
-fi
-if [[ $name == *txt ]]
-then
-  echo Error: Remove .txt from end of file name 
   exit
 fi
 if [[ ! $(ls -A  ./trees)  ]]
@@ -183,6 +173,6 @@ fi
 
 
 t="$(($(date +%s)-t))"
-printf "Time it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((t/60))" "$((t%60))"
+printf "Time it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((((t/60))%60))" "$((t%60))"
 
 exit
