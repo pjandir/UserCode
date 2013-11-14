@@ -62,6 +62,11 @@ then
   echo -e "Error: ROOT not found. Is cmsenv (or similar) sourced?"
   exit
 fi
+if [[ ! -d $cfadir ]]  
+then
+  echo -e "Error: The cfA directory does not seem to exist. Please check the file system."
+  exit
+fi
 if [[ ! -f ../$name.txt ]] 
 then
   echo -e "Sample text file does not seem to exist: $name.txt\n"
