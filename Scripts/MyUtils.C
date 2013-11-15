@@ -54,6 +54,10 @@ string GetSampleName( TString inputFile="") {
   if (inputFile.Contains("T1t1t"))          return "T1t1t";
   if (inputFile.Contains("T1ttcc"))          return "T1ttcc";
   if (inputFile.Contains("T7btw"))          return "T7btw";
+  if (inputFile.Contains("T6bbHH"))          return "T6bbHH";
+  if (inputFile.Contains("TChihh"))          return "TChihh";
+  if (inputFile.Contains("TChiHH"))          return "TChiHH";
+  if (inputFile.Contains("TChiZH"))          return "TChiZH";
   //pMSSM
   if (inputFile.Contains("pMSSM")) {
     if ( inputFile.Contains("batch1") )     return "pMSSM_b1";
@@ -79,7 +83,11 @@ string GetSignalType( TString name = "" ) {
        str == "T5tttt" ||
        str == "T1t1t" ||
        str == "T1ttcc" ||
-       str == "T7btw" 
+       str == "T7btw" || 
+       str == "T6bbHH" || 
+       str == "TChihh" ||
+       str == "TChiHH" ||
+       str == "TChiZH" 
      ) 
   {
      return "SMS";
