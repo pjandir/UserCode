@@ -16,14 +16,15 @@
 # Some notes:
 #
 # Entire "split" (can change that name, if desired) directory should be under NtupleTools
-# ROOT and hadd are used in this process, so make sure ROOT is sourced properl
+# ROOT and hadd are used in this process, so make sure ROOT is sourced properly
 
 #-------------
 # Usage
 #	Enter name of dataset you want to split in 'name'
 #		Dataset must live in 'cfadir'
-#		Can change other user settings if needed, but not needed
+#		Can change other user settings if needed, but is not necessary
 #	Wait for all jobs to finish in the batch system
+#		One should issue condor_q to check
 # 	Use postmortem (with argument 1) to finish the process
 #		No modification is required but, certain behaviors can be changed if desired
 #		See postmortem for more details
@@ -34,20 +35,20 @@
 #Full cfA name of dataset
 name=TTJets_WToBC_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V19-v1_AODSIM_UCSB1966_v71
 
-#Name of user. Keep it short with no spaces. Do not leave blank! 
+#Short, unique identifier with no spaces for job/file names. Do not leave blank! 
 user=pj
 
-#Directory where cfA datasets are stored. Change with caution.  
-cfadir=/mnt/hadoop/cms/store/users/cfA/2012
+#Produce btag efficiency variables. If this is not needed/wanted, it is safe to turn off.
+btageff=true
 
 #Number of cfA root files per batch job. Default is one. 
 multiple=1
 
+#Directory where cfA datasets are stored. Change with caution.  
+cfadir=/mnt/hadoop/cms/store/users/cfA/2012
+
 #Subdirectory where many temp files are stored.
 subdir=./files/
-
-#Produce btag efficiency variables. If this is not needed/wanted, it is safe to turn off.
-btageff=true
 
 #Mode for testing purposes
 debug=false
@@ -115,9 +116,9 @@ thepath=${fullpath%${thisdir}} 					#Full path to directory where the reducedTre
 mkdir -p trees           #Make a dir for the individual tree files
 mkdir -p logs            #Make a dir for condor log files
 mkdir -p reducedTrees    #Make a dir for final reducedTree location. Duplicated in postmortem. 
-mkdir -p $subdir        #Make a dir for temp files
+mkdir -p $subdir         #Make a dir for temp files
 
-#
+#Get the name of this sample
 sample=$(root -l -b -q 'GetSampleName.C("'$name'")' | tail -1) 
 echo The sample to be done is $sample
 
@@ -133,7 +134,7 @@ sleep 2
 
 #Loop through the dataset text file and create a new text file for each individual cfA root file
 #Use skeletons to create new files to submit to condor as batch jobs
-#Each cfA root file is treated as a separate soon-to-be reducedTree--one batch job to each
+#Each cfA root file is treated as a separate soon-to-be reducedTree--one batch job to each (if multiple=1)
 while read p; do
 
   y=`expr $y + 1` 
@@ -163,12 +164,6 @@ while read p; do
     condor_submit ${subdir}${user}_${sample}_$y.jdl >/dev/null
 
     echo -ne "."
-
-    mo=$(((y+1)%710))
-    if [[ $mo -eq 0 ]]
-    then
-      sleep 120
-    fi
 
   fi
 

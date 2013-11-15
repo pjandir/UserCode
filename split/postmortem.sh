@@ -27,7 +27,7 @@ name=TTJets_WToBC_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V19-v1_AODS
 nfiles=28
 #Subdirectory where many temp files are stored. Written by master. 
 dirname=./files/
-#User name. Written by master. 
+#Short, unique identifier with no spaces for job/file names. Written by master. 
 user=pj
 #Worry about btag efficiency. Written by master. 
 btageff=true
@@ -67,11 +67,10 @@ mkdir -p $destfolder
 
 t="$(date +%s)"
 
-#
+#Get the sample name
 sample=$(root -l -b -q 'GetSampleName.C("'$name'")' | tail -1) 
 echo The sample to be done is $sample
 sleep 1
-
 
 
 if [ $1 -eq 1  ]
