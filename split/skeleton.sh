@@ -16,8 +16,8 @@ export SCRAM_ARCH=slc5_amd64_gcc462
 #alias cmsenv='eval `scramv1 runtime -sh`'
 alias setlha='export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib && export LHAPATH=share/lhapdf'
 
-setlha
 cmsenv
+setlha
 
 ./run_Analysis $file 
 mv reducedTree*batch_dumNum.root ./dumPath2/trees

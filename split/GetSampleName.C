@@ -79,7 +79,9 @@ void GetSampleName( TString inputFile="") {
   if (inputFile.Contains("T6bbHH"))           ret = "T6bbHH"  ;
   if (inputFile.Contains("T6ttHH"))           ret = "T6ttHH"  ;
   if (inputFile.Contains("T5Wh"))             ret = "T5Wh"    ;
+  if (inputFile.Contains("T5WH"))             ret = "T5WH"    ;
   if (inputFile.Contains("T1tbbb"))           ret = "T1tbbb"  ;
+  if (inputFile.Contains("T1ttbb"))           ret = "T1ttbb"  ;
   if (inputFile.Contains("T1tttb"))           ret = "T1tttb"  ;
   if (inputFile.Contains("T2tb"))             ret = "T2tb"    ;
   //pMSSM
