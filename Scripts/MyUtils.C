@@ -65,16 +65,21 @@ string GetSampleName( TString inputFile="") {
     if ( inputFile.Contains("batch3") )     return "pMSSM_b3";
     if ( inputFile.Contains("batch4") )     return "pMSSM_b4"; 
   }
+  if (inputFile.Contains("MET_Run2012A"))  return "META";
+  if (inputFile.Contains("MET_Run2012B"))  return "METB";
+  if (inputFile.Contains("MET_Run2012C"))  return "METC";
+  if (inputFile.Contains("MET_Run2012D"))  return "METD";
 
   //Otherwise not found
   return inputFile;
 }
 
-string GetSignalType( TString name = "" ) {
+
+string GetSignalType( TString name = "" ) { 
 
   string str = GetSampleName(name);
   
-  if ( str == "T1bbbb" || 
+  if ( str == "T1bbbb" ||  
        str == "T1bbbb_madgraph" ||
        str == "T1tttt" ||
        str == "T1tttt_madgraph" ||
@@ -83,12 +88,16 @@ string GetSignalType( TString name = "" ) {
        str == "T5tttt" ||
        str == "T1t1t" ||
        str == "T1ttcc" ||
-       str == "T7btw" || 
+       str == "T1tbbb" ||
+       str == "T1ttbb" ||
+       str == "T1tttb" ||
+       str == "T2tb" ||
        str == "T6bbHH" || 
        str == "TChihh" ||
        str == "TChiHH" ||
-       str == "TChiZH" 
-     ) 
+       str == "TChiZH" || 
+     str == "T7btw" 
+     )   
   {
      return "SMS";
   }
@@ -96,8 +105,8 @@ string GetSignalType( TString name = "" ) {
      return "pMSSM";
   }
 
-  //Otherwise whatever name is..
-  return name;
+  //Otherwise we have no idea..
+  return "UNKNOWN";
 }
 
 
@@ -120,6 +129,7 @@ string GetPrintout( string sampleName="", int mgl=800, int mlsp=700, TString inF
   }
   return str;
 }
+
 
 void ttwj(int choice, ifstream& ttbarSig, ifstream& wj250Sig, ifstream& wj300Sig, ifstream& wj400Sig, ifstream& ttbarSl, ifstream& wj250Sl, ifstream& wj300Sl, ifstream& wj400Sl ) {
 
