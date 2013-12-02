@@ -93,6 +93,13 @@ void GetSampleName( TString inputFile="") {
   }
   if (inputFile.Contains("HbbHbb") ) ret = "hbbhbb"; 
   if (inputFile.Contains("TChihh") ) ret = "TChihh"; 
+
+  if (inputFile.Contains("MET_Run2012A"))  ret = "META";
+  if (inputFile.Contains("MET_Run2012B"))  ret = "METB";
+  if (inputFile.Contains("MET_Run2012C"))  ret = "METC";
+  if (inputFile.Contains("MET_Run2012D"))  ret = "METD";
+ 
+
   //Otherwise not found--be careful..
 
   cout << ret << endl;
