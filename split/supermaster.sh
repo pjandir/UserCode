@@ -89,7 +89,6 @@ do
   echo "===> Preparing dataset #$y: $d .. $thetime" >> $thelog
 
   sh master.sh > /dev/null
-  #sh master.sh
   echo -ne "\tSubmitted all jobs.. " >> $thelog 
   a=0
   while true ; do 
@@ -102,7 +101,6 @@ do
       thetime=`date`
       echo "  .. starting postmortem .. $thetime" >> $thelog
       sh postmortem.sh 1 > /dev/null
-      #sh postmortem.sh 1
       a=0
       break
     fi
@@ -118,11 +116,6 @@ do
   timetaken=$(printf "\tTime it took to run this dataset: %02d:%02d:%02d\n\n" "$((t/3600))" "$((t/60))" "$((t%60))")
   echo -ne "$timetaken\n\n" >> $thelog
 
-  #if [[ $y -eq 2 ]]
-  #then
-  #  echo "breaking out early yo"
-  #  break
-  #fi
  
 done
 
