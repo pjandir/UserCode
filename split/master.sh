@@ -103,7 +103,14 @@ then
   echo -e "Error: btageff histo file does not exist"
   exit
 fi
-
+#Only a warning: check if another dataset might already be in condor
+dnumjobs=$(condor_q $fulluser | tail -1)
+rnumjobs=${dnumjobs:0:1}
+if [[ rnumjobs -ne 0 ]]
+then
+  echo -e "WARNING: You appear to have jobs on condor already. Sleeping just in case..."
+  sleep 20
+fi
 
 t="$(date +%s)"
 
