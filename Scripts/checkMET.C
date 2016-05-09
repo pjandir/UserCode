@@ -9,8 +9,10 @@
 #include "TString.h"
 #include "TROOT.h"
 
+//This is a simple example showing how to access multiple TTrees 
+
 //input paths to the two reducedTrees
-void checkMET(TString first = "", TString second = ""  ) {
+void CheckMET(TString first = "", TString second = ""  ) {
   TDatime time1;
 
   TChain tree1("reducedTree");

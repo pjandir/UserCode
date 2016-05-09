@@ -9,7 +9,7 @@
 //Must compile with .L compareBtagEffFiles.C+
 
 //Compare the btag histo files histograms bin-by-bin
-void compareBtagEffFiles( TString ind = "" , TString inf = "" ) {
+void CompareBtagEffFiles( TString ind = "" , TString inf = "" ) {
 
   const int ngraph = 9;       // # plots to compare
   const int nbins = 19;       // # bins to compare in each plot

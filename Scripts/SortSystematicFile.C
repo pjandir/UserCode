@@ -39,8 +39,7 @@ void SortSystematicFile( TString in1 = "btagEff_T1bbbb_SIG.txt", int signal = 1)
   }
 
   if ( signal == 1 ) {
-    //Mystery sort (most likely an implementation of bubble..)
-    //Hey it works..
+    //The actual sort
     int a, b = 0;
     bool swapped = true;
     string temp;
@@ -64,8 +63,7 @@ void SortSystematicFile( TString in1 = "btagEff_T1bbbb_SIG.txt", int signal = 1)
     }//end swap
   }// SMS
   if ( signal == 2 ) {
-    //Mystery sort (most likely an implementation of bubble..)
-    //Hey it works..
+    //The actual sort
     int a, b = 0;
     bool swapped = true;
     string temp;
@@ -87,26 +85,6 @@ void SortSystematicFile( TString in1 = "btagEff_T1bbbb_SIG.txt", int signal = 1)
       }   
     }//end swap
   }// pMSSM
-
-
-  /*Insertion sort
-  //Doesn't work..
-  int b=0;
-  for (int a=1; a<vals.size(); ++a) {
-    string key = vals[a];
-    b = a-1;
-    istringstream issa(vals[a]);
-    istringstream issb(vals[b]);     
-    int gla, lspa;
-    int glb, lspb;
-    issa >> gla >> lspa;  
-    issb >> glb >> lspb;  
-    while( (b>=0 && !massCompare(gla,lspa,glb,lspb) ) ) {
-      vals[b+1] = vals[b];
-      b -= 1;
-    } 
-    vals[b+1] = key;
-  }*/
 
   //Print out sorted values to sorted file.
   for ( vector<string>::iterator itr=vals.begin(); itr!=vals.end(); itr++) out << *itr << endl;

@@ -10,7 +10,7 @@
 #include "TROOT.h"
 #include "MyUtils.C"
 
-void EffVariation( TString inputFile = "" , int verbosity = 0, int mgl = 800, int mlsp = 500 ) {  //-- flat error in %.  If negative, use MC stat err.
+void EffVariationMod( TString inputFile = "" , int verbosity = 0, int mgl = 800, int mlsp = 500 , string mod) { 
 
 // Taken from GenerateSUSYFile.C 
 // Adapted for single point use
@@ -73,10 +73,14 @@ void EffVariation( TString inputFile = "" , int verbosity = 0, int mgl = 800, in
     int mLsp = mlsp;
   }
 
-  ofstream ofs, inFile, inFileErr;
+  ofstream ofs_sig, ofs_ldp, ofs_sl, inFile, inFileErr;
   char outfile[200];
-  sprintf( outfile, "btagEff_%s.txt", sampleName.c_str() ) ;  
-  ofs.open( outfile );
+  sprintf( outfile, "btagEff_Sig_%s_%s_%i_%i.txt", sampleName.c_str() , mod.c_str(), mgl, mlsp) ;  
+  ofs_sig.open( outfile );
+  sprintf( outfile, "btagEff_Ldp_%s_%s_%i_%i.txt", sampleName.c_str() , mod.c_str(), mgl, mlsp) ;  
+  ofs_ldp.open( outfile );
+  sprintf( outfile, "btagEff_Sl_%s_%s_%i_%i.txt", sampleName.c_str() , mod.c_str(), mgl, mlsp) ;  
+  ofs_sl.open( outfile );
   sprintf( outfile, "datfiles/%s-met%d-ht%d-v%d-EffCounts-SIG.dat", sampleName.c_str(), nBinsMET, nBinsHT, version ) ;  
   inFile.open( outfile );
   sprintf( outfile, "datfiles/%s-met%d-ht%d-v%d-EffCountsErr-SIG.dat", sampleName.c_str(), nBinsMET, nBinsHT, version ) ;  
@@ -143,14 +147,14 @@ void EffVariation( TString inputFile = "" , int verbosity = 0, int mgl = 800, in
 
   }
 
-  float xsec = -1.;
+//  float xsec = -1.;
   if ( sampleName == "T1bbbb" ) {
-    int theBin = gluinoxsec->FindBin( mGl ) ;					      
-    if ( theBin <=0 || theBin > gluinoxsec->GetNbinsX() ) {			      
-      printf("\n\n *** can't find bin for mgl=%d.  Returned %d\n\n", mGl, theBin ) ; 
-      return ; 								      
-    }										      
-    xsec = gluinoxsec->GetBinContent( theBin ) ;				      
+//    int theBin = gluinoxsec->FindBin( mGl ) ;					      
+//    if ( theBin <=0 || theBin > gluinoxsec->GetNbinsX() ) {			      
+//      printf("\n\n *** can't find bin for mgl=%d.  Returned %d\n\n", mGl, theBin ) ; 
+//      return ; 								      
+//    }										      
+//    xsec = gluinoxsec->GetBinContent( theBin ) ;				      
 
     printf("\n  mGl=%4d, mLsp=%4d\n", mGl, mLsp ) ; cout << flush ;
   }
@@ -231,9 +235,12 @@ void EffVariation( TString inputFile = "" , int verbosity = 0, int mgl = 800, in
   printf("\n\n") ;
 
   char dummy[200];
-  if ( sampleName == "T1bbbb" ) 
-    ofs << mGl << "     " << mLsp << "    ";
- 
+  if ( sampleName == "T1bbbb" ) { 
+    ofs_sig << mGl << "     " << mLsp << "    ";
+    ofs_ldp << mGl << "     " << mLsp << "    ";
+    ofs_sl << mGl << "     " << mLsp << "    ";
+  }
+
   for (int i = 0 ; i < nBinsMET ; i++) {
     for (int j = 0 ; j < nBinsHT ; j++) {
       for (int k = 0 ; k < nBinsBjets ; k++) {
@@ -244,15 +251,29 @@ void EffVariation( TString inputFile = "" , int verbosity = 0, int mgl = 800, in
          else
            delta_sig[i][j][k] = 0.50;     
 
-        delta_sl[i][j][k] = 0.5 * ( h_susy_sl_p1sig[k]->GetBinContent(i+1,j+1) - h_susy_sl_m1sig[k]->GetBinContent(i+1,j+1) ) / h_susy_sl[k]->GetBinContent(i+1,j+1) ;
-        delta_ldp[i][j][k] = 0.5 * ( h_susy_ldp_p1sig[k]->GetBinContent(i+1,j+1) - h_susy_ldp_m1sig[k]->GetBinContent(i+1,j+1) ) / h_susy_ldp[k]->GetBinContent(i+1,j+1) ;
-//        float num1 = (h_susy_sig_p1sig[k]->GetBinContent(i+1,j+1) / h_susy_sig[k]->GetBinContent(i+1,j+1) - 1);
-//        float num2 = (h_susy_sig_m1sig[k]->GetBinContent(i+1,j+1) / h_susy_sig[k]->GetBinContent(i+1,j+1) - 1);
-//        cout << "Nominal delta:" << delta_sig[i][j][k] << " with p1 delta:  " << num1 << " and m1 delta: " << num2 << endl;     
+        if( h_susy_ldp[k]->GetBinContent(i+1,j+1) != 0.0 )
+           delta_ldp[i][j][k] = 0.5 * ( h_susy_ldp_p1sig[k]->GetBinContent(i+1,j+1) - h_susy_ldp_m1sig[k]->GetBinContent(i+1,j+1) ) / h_susy_ldp[k]->GetBinContent(i+1,j+1) ;
+         else if ( h_susy_ldp_p1sig[k]->GetBinContent(i+1,j+1) == 0.0 && h_susy_ldp_m1sig[k]->GetBinContent(i+1,j+1) == 0.0 )
+           delta_ldp[i][j][k] = 0.0;
+         else
+           delta_ldp[i][j][k] = 0.50;     
+
+        if( h_susy_sl[k]->GetBinContent(i+1,j+1) != 0.0 )
+           delta_sl[i][j][k] = 0.5 * ( h_susy_sl_p1sig[k]->GetBinContent(i+1,j+1) - h_susy_sl_m1sig[k]->GetBinContent(i+1,j+1) ) / h_susy_sl[k]->GetBinContent(i+1,j+1) ;
+         else if ( h_susy_sl_p1sig[k]->GetBinContent(i+1,j+1) == 0.0 && h_susy_sl_m1sig[k]->GetBinContent(i+1,j+1) == 0.0 )
+           delta_sl[i][j][k] = 0.0;
+         else
+           delta_sl[i][j][k] = 0.50;     
+        
         inFile << h_susy_sig[k]->GetBinContent(i+1, j+1) << " " ;
         inFileErr << h_susy_sig[k]->GetBinError(i+1, j+1) << " " ;
+
         sprintf(dummy, "  %6.3f ", delta_sig[i][j][k]);
-        ofs << dummy ; 
+        ofs_sig << dummy ; 
+        sprintf(dummy, "  %6.3f ", delta_ldp[i][j][k]);
+        ofs_ldp << dummy ; 
+        sprintf(dummy, "  %6.3f ", delta_sl[i][j][k]);
+        ofs_sl << dummy ; 
       } // k
       inFile << endl;
       inFileErr << endl;
@@ -316,7 +337,9 @@ void EffVariation( TString inputFile = "" , int verbosity = 0, int mgl = 800, in
   
   printf("----------------\n") ;
 
-  ofs.close();
+  ofs_sig.close();
+  ofs_ldp.close();
+  ofs_sl.close();
   inFile.close();
   inFileErr.close();
   

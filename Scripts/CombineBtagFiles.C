@@ -9,7 +9,7 @@
 #include "TString.h"
 #include "TROOT.h"
 
-void combine( TString sig = "btagEff_T1bbbb_SIG.txt", TString sl = "btagEff_T1bbbb_SL.txt", TString ldp = "btagEff_T1bbbb_LDP.txt" , TString slsig = "btagEff_T1tttt_SLSIG.txt", TString outfile = "out.txt" ) { 
+void CombineBtagFiles( TString sig = "btagEff_T1bbbb_SIG.txt", TString sl = "btagEff_T1bbbb_SL.txt", TString ldp = "btagEff_T1bbbb_LDP.txt" , TString slsig = "btagEff_T1tttt_SLSIG.txt", TString outfile = "out.txt" ) { 
 
   ifstream isig, ildp, isl, islsig;
   isig.open( sig );
@@ -73,15 +73,4 @@ void combine( TString sig = "btagEff_T1bbbb_SIG.txt", TString sl = "btagEff_T1bb
   out.close();
   return;
 }
-/*
-  TString dum;
-  char instuff[500];
 
-  while ( in.getline(instuff,500,'\n')  ) { 
-    
-   istringstream iss(instuff);
-   while (iss >> dum) {
-     out << dum << " , ";  
-   }   
-   out << dum << " , " << endl;
-*/

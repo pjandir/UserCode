@@ -49,17 +49,17 @@ mv rawCounts_${model}_SL.txt.original final_txt
 echo Combining all search regions for the three sets of files.
 sleep 1
 
-#if [  $signal -eq 1 ]
-#then
+if [  $signal -eq 1 ]
+then
   root -l -b -q 'combine.C("'btagEff_${model}_SIG.txt'", "'btagEff_${model}_SL.txt'","'btagEff_${model}_LDP.txt'","''","'btagEff_${model}_SIG_SL_LDP.txt'")'
   root -l -b -q 'combine.C("'lightMistag_${model}_SIG.txt'", "'lightMistag_${model}_SL.txt'","'lightMistag_${model}_LDP.txt'","''","'lightMistag_${model}_SIG_SL_LDP.txt'")'
   root -l -b -q 'combine.C("'rawCounts_${model}_SIG.txt'", "'rawCounts_${model}_SL.txt'","'rawCounts_${model}_LDP.txt'","''","'rawCounts_${model}_SIG_SL_LDP.txt'")'
-#elif [  $signal -eq 2  ]
-#then
-#  root -l -b -q 'combine_pMSSM.C("'btagEff_${model}_SIG.txt'", "'btagEff_${model}_SL.txt'","'btagEff_${model}_LDP.txt'","''","'btagEff_${model}_SIG_SL_LDP.txt'")'
-#  root -l -b -q 'combine_pMSSM.C("'lightMistag_${model}_SIG.txt'", "'lightMistag_${model}_SL.txt'","'lightMistag_${model}_LDP.txt'","''","'lightMistag_${model}_SIG_SL_LDP.txt'")'
-#  root -l -b -q 'combine_pMSSM.C("'rawCounts_${model}_SIG.txt'", "'rawCounts_${model}_SL.txt'","'rawCounts_${model}_LDP.txt'","''","'rawCounts_${model}_SIG_SL_LDP.txt'")'
-#fi
+elif [  $signal -eq 2  ]
+then
+  root -l -b -q 'combine_pMSSM.C("'btagEff_${model}_SIG.txt'", "'btagEff_${model}_SL.txt'","'btagEff_${model}_LDP.txt'","''","'btagEff_${model}_SIG_SL_LDP.txt'")'
+  root -l -b -q 'combine_pMSSM.C("'lightMistag_${model}_SIG.txt'", "'lightMistag_${model}_SL.txt'","'lightMistag_${model}_LDP.txt'","''","'lightMistag_${model}_SIG_SL_LDP.txt'")'
+  root -l -b -q 'combine_pMSSM.C("'rawCounts_${model}_SIG.txt'", "'rawCounts_${model}_SL.txt'","'rawCounts_${model}_LDP.txt'","''","'rawCounts_${model}_SIG_SL_LDP.txt'")'
+fi
 
 exit
 

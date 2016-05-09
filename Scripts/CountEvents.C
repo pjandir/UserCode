@@ -10,7 +10,7 @@
 #include "TROOT.h"
 #include "MyUtils.C"
 
-void CountEvents( TString inputFile = "" , int mgl = 800, int mlsp = 700, double flatDummyErr = 10. ) {  //-- flat error in %.  If negative, use MC stat err.
+void CountEventsMod( TString inputFile = "" , int mgl = 800, int mlsp = 700, double flatDummyErr = 10., string mod ) {  //-- flat error in %.  If negative, use MC stat err.
 
   string sampleName = GetSampleName( inputFile );  
   string printout = GetPrintout( sampleName, mgl, mlsp ); 
@@ -66,7 +66,14 @@ void CountEvents( TString inputFile = "" , int mgl = 800, int mlsp = 700, double
   }
 
   ofstream inFile, inFileErr;
+  ofstream ofs_sig, ofs_ldp, ofs_sl;
   char outfile[10000] ;
+  sprintf( outfile, "eventCount_Sig_%s_%s_%i_%i.txt", sampleName.c_str() , mod.c_str(), mgl, mlsp) ;   
+  ofs_sig.open( outfile );
+  sprintf( outfile, "eventCount_Ldp_%s_%s_%i_%i.txt", sampleName.c_str() , mod.c_str(), mgl, mlsp) ;   
+  ofs_ldp.open( outfile ); 
+  sprintf( outfile, "eventCount_Sl_%s_%s_%i_%i.txt", sampleName.c_str() , mod.c_str(), mgl, mlsp) ;   
+  ofs_sl.open( outfile ); 
   sprintf( outfile, "datfiles/%s-met%d-ht%d-v%d-RawCounts-SIG.dat", sampleName.c_str(), nBinsMET, nBinsHT, version ) ;
   inFile.open( outfile );
   sprintf( outfile, "datfiles/%s-met%d-ht%d-v%d-RawCountsErr-SIG.dat", sampleName.c_str(), nBinsMET, nBinsHT, version ) ;
@@ -108,15 +115,18 @@ void CountEvents( TString inputFile = "" , int mgl = 800, int mlsp = 700, double
 
   float xsec = -1.;
   if( sampleName == "T1bbbb" ) {
-    int theBin = gluinoxsec->FindBin( mGl ) ;					      
-    if ( theBin <=0 || theBin > gluinoxsec->GetNbinsX() ) {			      
-      printf("\n\n *** can't find bin for mgl=%d.  Returned %d\n\n", mGl, theBin ) ; 
-      return ; 								      
-    }										      
-    xsec = gluinoxsec->GetBinContent( theBin ) ;				      
+  //  int theBin = gluinoxsec->FindBin( mGl ) ;					      
+  //  if ( theBin <=0 || theBin > gluinoxsec->GetNbinsX() ) {			      
+  //    printf("\n\n *** can't find bin for mgl=%d.  Returned %d\n\n", mGl, theBin ) ; 
+  //    return ; 								      
+  //  }										      
+  //  xsec = gluinoxsec->GetBinContent( theBin ) ;				      
 
     if( sampleName == "T1bbbb") {
       inFile << mGl << " " << mLsp << " " << dummyEvts << " " ;
+      ofs_sig << mGl << " " << mLsp << " " ;
+      ofs_ldp << mGl << " " << mLsp << " " ;
+      ofs_sl << mGl << " " << mLsp << " " ;
       printf(" mGl=%4d, mLsp=%4d\n", mGl, mLsp ) ; cout << flush ;
     }
   }
@@ -162,6 +172,8 @@ void CountEvents( TString inputFile = "" , int mgl = 800, int mlsp = 700, double
   } // k (nBjets)
   printf("\n\n") ;
 
+  
+
   printf("----------------\n") ;
   for (int i = 0 ; i < nBinsMET ; i++) {
     for (int j = 0 ; j < nBinsHT ; j++) {
@@ -175,6 +187,9 @@ void CountEvents( TString inputFile = "" , int mgl = 800, int mlsp = 700, double
          
         inFile << h_susy_sig[k]->GetBinContent( i+1, j+1) << " ";
         inFileErr << h_susy_sig[k]->GetBinError( i+1, j+1) << " ";
+        ofs_sig << h_susy_sig[k]->GetBinContent( i+1, j+1) << " ";
+        ofs_ldp << h_susy_ldp[k]->GetBinContent( i+1, j+1) << " ";
+        ofs_sl << h_susy_ldp[k]->GetBinContent( i+1, j+1) << " ";
 
       } // k
       inFile << endl;
@@ -210,13 +225,13 @@ void CountEvents( TString inputFile = "" , int mgl = 800, int mlsp = 700, double
         if ( nsel_sig > 0. ) { nevt_err_sig = 0.5*xsec*sqrt(nsel_sig) ; }
         if ( nsel_sl  > 0. ) { nevt_err_sl  = 0.5*xsec*sqrt(nsel_sl ) ; }
         if ( nsel_ldp > 0. ) { nevt_err_ldp = 0.5*xsec*sqrt(nsel_ldp) ; }
-*/
+
         printf ( " Xsec weighted events: %s: MET,HT (%d,%d) nb=%d   SIG = %6.1f +/- %4.1f,   SL=%6.1f +/- %4.1f,   LDP=%6.1f +/- %4.1f\n",
                  printout.c_str(), i+1, j+1, k+1,
                  0.5*xsec*(h_susy_sig[k] -> GetBinContent( i+1, j+1 )), nevt_err_sig,
                  0.5*xsec*(h_susy_sl[k]  -> GetBinContent( i+1, j+1 )), nevt_err_sl,
                  0.5*xsec*(h_susy_ldp[k] -> GetBinContent( i+1, j+1 )), nevt_err_ldp  ) ;
-
+*/
       } // k
       printf("----------------\n") ;
     } // j

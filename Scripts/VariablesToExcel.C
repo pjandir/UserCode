@@ -7,7 +7,7 @@
 
 using namespace std;
 
-
+//Simple file converted to csv
 void VariablesToExcel(TString inFile  = "in.txt") {
 
   ifstream in;

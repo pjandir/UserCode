@@ -9,7 +9,7 @@ using namespace std;
 
 //Input a rawCounts_SMS_MODEL_SEARCH_REGION.txt file to sum up all search region numbers.
 //In other words, one should get back the total number of events from generator level.
-void CountIt(TString inFile  = "in.txt") {
+void CountSR(TString inFile  = "in.txt") {
 
   ifstream in; 
   in.open(inFile);
@@ -52,3 +52,4 @@ void CountIt(TString inFile  = "in.txt") {
   out.close();
  
 } //end main
+
