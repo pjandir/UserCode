@@ -15,7 +15,7 @@
 
 # Some notes:
 #
-# Entire "split" (can change that name, if desired) directory should be under NtupleTools
+# Entire "batch_split" (can change that name, if desired) directory should be under NtupleTools
 # ROOT and hadd are used in this process, so make sure ROOT is sourced properly
 
 #-------------
@@ -25,7 +25,7 @@
 #		Can change other user settings if needed, but is not necessary
 #	Wait for all jobs to finish in the batch system
 #		One should issue condor_q to check
-# 	Use postmortem (with argument 1) to finish the process
+# 	Use postmortem script (with argument 1) to finish the process
 #		No modification is required but, certain behaviors can be changed if desired
 #		See postmortem for more details
 #-------------
@@ -57,9 +57,8 @@ debug=false
 
 
 #Do some error-checking to make sure things will run smoothly in the process
-root -l -b -q > trash.txt
+root -l -b -q &> /dev/null
 rval=$?
-rm trash.txt
 if [[ $rval -ne 0 ]]
 then
   echo -e "Error: ROOT not found. Is cmsenv (or similar) sourced?"
@@ -185,3 +184,4 @@ t="$(($(date +%s)-t))"
 printf "\nTime it took to run this program: %02d:%02d:%02d\n" "$((t/3600))" "$((t/60))" "$((t%60))"
 
 exit
+
