@@ -8,7 +8,7 @@
 #     - Sits on top of it without modification
 #   - Must be EXTREMELY careful; there is limited protection against condor system    
 #
-# Written by: Pawandeep Jandir
+# Written by: P Jandir
 ###########################################################################################
 
 

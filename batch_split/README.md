@@ -1,0 +1,3 @@
+This is a method to use a condor batch system in order to process large numbers of files. In particular, this processes datasets through specific analysis code (in this case within the ROOT framework). It is simple to use. One can run the master.sh script to identify a single dataset to process and give a few other options. Then when condor is finished processing, one can run postmortem.sh which will (h)add everything back together. One can also use supermaster.sh and input multiple datasets. Note supermaster.sh can run for long periods of time. It also has some condor vulnerabilities which are not protected against, so caution is advised.
+
+Additional information on ROOT can be found here: https://root.cern.ch/. 

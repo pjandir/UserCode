@@ -10,7 +10,7 @@
 #   - Please report to the author for bug reports and any other requests
 #
 #
-# Written by: Pawandeep Jandir
+# Written by: P Jandir
 ###########################################################################################
 
 # Some notes:
